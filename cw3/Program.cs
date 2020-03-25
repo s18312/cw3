@@ -24,3 +24,5 @@ namespace cw3
                 });
     }
 }
+
+//services.AddScoped<IStudentDb,StudentDb>();

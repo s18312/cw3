@@ -7,8 +7,7 @@ namespace cw3.Models
 {
     public class Student
     {
-        //prop+tabx2
-        public int IdStudent { get; set; }
+        
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string IndexNumber { get; set; }

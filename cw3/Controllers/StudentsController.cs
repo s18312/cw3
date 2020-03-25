@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using cw3.DAL;
@@ -13,8 +14,9 @@ namespace cw3.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly IDbService _dbService;
+        private const string ConString = "Data Source=db-mssql;Initial Catalog=s18312;Integrated Security=True";
 
-        public StudentsController(IDbService dbService)
+        public StudentsController([FromServices] IDbService dbService)
         {
             _dbService = dbService;
         }
@@ -23,21 +25,60 @@ namespace cw3.Controllers
         [HttpGet]
         public IActionResult GetStudents(string orderBy)
         {
-            return Ok(_dbService.GetStudents());
+            var list = new List<Student>();
+            
+            using (SqlConnection con = new SqlConnection(ConString))
+            {
+                using (SqlCommand com = new SqlCommand())
+                {
+                    com.Connection = con;
+                    com.CommandText = "select * from Student";
+
+                    con.Open();
+                    SqlDataReader dr = com.ExecuteReader();
+                    while (dr.Read())
+                    {
+                        var st = new Student();
+                        st.IndexNumber = dr["IndexNumber"].ToString();
+                        st.FirstName = dr["FirstName"].ToString();
+                        st.LastName = dr["LastName"].ToString();
+                        list.Add(st);
+                    }
+
+                }
+            }
+           
+
+            return Ok(list);
         } 
 
         [HttpGet("{id}")]
         public IActionResult GetStudents(int id)
         {
-            if (id == 1)
+
+            using (SqlConnection con = new SqlConnection(ConString))
             {
-                return Ok("Kowalski");
+                using (SqlCommand com = new SqlCommand())
+                {
+                    com.Connection = con;
+                    com.CommandText = "select E.IdEnrollment, E.Semester, E.IdStudy, E.StartDate  from Enrollment E JOIN Student S ON E.IdEnrollment = S.IdEnrollment WHERE S.IndexNumber = @id;";
+                    com.Parameters.Add(new SqlParameter("id", id));
+
+                    con.Open();
+                    SqlDataReader dr = com.ExecuteReader();
+                    String result = null;
+                    if (dr.Read())
+                    {
+                        result += "IdEnrollment: " + dr["IdEnrollment"].ToString() + " ";
+                        result += "Semester: " + dr["Semester"].ToString() + " ";
+                        result += "IdStudy: " + dr["IdStudy"].ToString() + " ";
+                        result += "StartDate: " + dr["StartDate"].ToString();
+                    }
+                   
+
+                    return Ok(result);
+                }
             }
-            else if (id == 2)
-            {
-                return Ok("Malewski");
-            }
-            return NotFound("Nie znaleziono studenta");
         }
 
         [HttpPost]
@@ -48,9 +89,9 @@ namespace cw3.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateStudent(int id, [FromBody]Student stud)
+        public IActionResult UpdateStudent(String index, [FromBody]Student stud)
         {
-            if(stud.IdStudent == id)
+            if (stud.IndexNumber == index)
             {
                 stud.FirstName = "Tymoteusz";
             }
@@ -58,9 +99,9 @@ namespace cw3.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteStudent(int id, [FromBody]Student stud)
+        public IActionResult DeleteStudent(String index, [FromBody]Student stud)
         {
-            if (stud.IdStudent == id)
+            if (stud.IndexNumber == index)
             {
                 stud = null;
             }

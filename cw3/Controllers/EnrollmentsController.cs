@@ -187,6 +187,7 @@ namespace cw3.Controllers
                         }
 
                         com.CommandText = "SELECT IdEnrollment FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
+                        com.Parameters.AddWithValue("IdStudies", idStudies);
                         dr = com.ExecuteReader();
                         if (!dr.Read())
                         {
@@ -194,7 +195,17 @@ namespace cw3.Controllers
                             return NotFound();
                         }
                         en.IdEnrollment = (int)dr["IdEnrollment"];
-                        en.StartDate = DateTime.Now;
+                        dr.Close();
+
+                        com.CommandText = "SELECT StartDate FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
+                        com.Parameters.AddWithValue("IdStudies", idStudies);
+                        dr = com.ExecuteReader();
+                        if (!dr.Read())
+                        {
+                            dr.Close();
+                            return NotFound();
+                        }
+                        en.StartDate = (DateTime)dr["StartDate"];
 
                     }
                     catch (SqlException e)

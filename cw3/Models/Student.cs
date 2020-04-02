@@ -7,9 +7,13 @@ namespace cw3.Models
 {
     public class Student
     {
-        
+
+        public string IndexNumber { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string IndexNumber { get; set; }
+        public DateTime Birthdate { get; set; }
+        public string Studies { get; set; }
+        public int Semester { get; set; }
+        public int IdEnrollment { get; set; }
     }
 }

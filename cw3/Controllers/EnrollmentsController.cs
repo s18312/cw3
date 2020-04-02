@@ -10,21 +10,22 @@ using System.Threading.Tasks;
 
 namespace cw3.Controllers
 {
-   
+
     [ApiController]
     [Route("api/enrollments")]
     public class EnrollmentsController : ControllerBase
     {
+
         private IStudentDbService _service;
         private const string ConString = "Data Source=db-mssql;Initial Catalog=s18312;Integrated Security=True";
 
-        public EnrollmentsController(IStudentDbService service)
+        public EnrollmentsController(SqlStudentServerDBService service)
         {
             _service = service;
         }
 
 
-        [HttpPost]
+        /*[HttpPost]
         public IActionResult EnrollStudent(EnrollRequest request)
         {
             
@@ -128,100 +129,127 @@ namespace cw3.Controllers
             }
             return Ok("nope");
         }
+*/
+        /*
 
-
-        [HttpPost]
-        public IActionResult Promotions(PromoteRequest request)
-        {
-            Enrollment en = new Enrollment();
-            using (SqlConnection con = new SqlConnection(ConString))
-            {
-
-                using (SqlCommand com = new SqlCommand())
+                [HttpPost("{promotions}")]
+                public IActionResult Promotions(PromoteRequest request)
                 {
-                    com.Connection = con;
-                    con.Open();
-                    var tran = con.BeginTransaction();
-                    com.Transaction = tran;
-
-                    try
+                    Enrollment en = new Enrollment();
+                    using (SqlConnection con = new SqlConnection(ConString))
                     {
-                        com.CommandText = "SELECT IdStudy from Studies WHERE name=@name";
-                        com.Parameters.AddWithValue("name", request.Studies);
-                        var dr = com.ExecuteReader();
-                        if (!dr.Read())
-                        {
-                            dr.Close();
-                            tran.Rollback();
-                            return NotFound();
-                        }
-                        int idStudies = (int)dr["IdStudy"];
-                        en.IdStudy = idStudies;
-                        dr.Close();
-                        com.CommandText = "SELECT Semester FROM Enrollment WHERE IdStudy = @IdStudies ";
-                        com.Parameters.AddWithValue("IdStudies", idStudies);
-                        dr = com.ExecuteReader();
-                        if (!dr.Read())
-                        {
-                            dr.Close();
-                            tran.Rollback();
-                            return NotFound();
-                        }
-                        dr.Close();
-                        com.CommandText = "exec Procedura @Studies, @Semester";
-                        com.Parameters.AddWithValue("Studies", "Informatyka");
-                        com.Parameters.AddWithValue("Semester", request.Semester);
-                        en.Semester = request.Semester + 1;
-                        dr = com.ExecuteReader();
-                        if (!dr.Read())
-                        {
-                            dr.Close();
-                            tran.Rollback();
-                            return NotFound();
-                        }
-                        else
-                        {
-                            dr.Close();
-                            com.BeginExecuteNonQuery();
-                            tran.Commit();
-                        }
 
-                        com.CommandText = "SELECT IdEnrollment FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
-                        com.Parameters.AddWithValue("IdStudies", idStudies);
-                        dr = com.ExecuteReader();
-                        if (!dr.Read())
+                        using (SqlCommand com = new SqlCommand())
                         {
-                            dr.Close();
-                            return NotFound();
-                        }
-                        en.IdEnrollment = (int)dr["IdEnrollment"];
-                        dr.Close();
+                            com.Connection = con;
+                            con.Open();
+                            var tran = con.BeginTransaction();
+                            com.Transaction = tran;
 
-                        com.CommandText = "SELECT StartDate FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
-                        com.Parameters.AddWithValue("IdStudies", idStudies);
-                        dr = com.ExecuteReader();
-                        if (!dr.Read())
-                        {
-                            dr.Close();
-                            return NotFound();
-                        }
-                        en.StartDate = (DateTime)dr["StartDate"];
+                            try
+                            {
+                                com.CommandText = "SELECT IdStudy from Studies WHERE name=@name";
+                                com.Parameters.AddWithValue("name", request.Studies);
+                                var dr = com.ExecuteReader();
+                                if (!dr.Read())
+                                {
+                                    dr.Close();
+                                    tran.Rollback();
+                                    return NotFound();
+                                }
+                                int idStudies = (int)dr["IdStudy"];
+                                en.IdStudy = idStudies;
+                                dr.Close();
+                                com.CommandText = "SELECT Semester FROM Enrollment WHERE IdStudy = @IdStudies ";
+                                com.Parameters.AddWithValue("IdStudies", idStudies);
+                                dr = com.ExecuteReader();
+                                if (!dr.Read())
+                                {
+                                    dr.Close();
+                                    tran.Rollback();
+                                    return NotFound();
+                                }
+                                dr.Close();
+                                com.CommandText = "exec Procedura @Studies, @Semester";
+                                com.Parameters.AddWithValue("Studies", "Informatyka");
+                                com.Parameters.AddWithValue("Semester", request.Semester);
+                                en.Semester = request.Semester + 1;
+                                dr = com.ExecuteReader();
+                                if (!dr.Read())
+                                {
+                                    dr.Close();
+                                    tran.Rollback();
+                                    return NotFound();
+                                }
+                                else
+                                {
+                                    dr.Close();
+                                    com.BeginExecuteNonQuery();
+                                    tran.Commit();
+                                }
 
+                                com.CommandText = "SELECT IdEnrollment FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
+                                com.Parameters.AddWithValue("IdStudies", idStudies);
+                                dr = com.ExecuteReader();
+                                if (!dr.Read())
+                                {
+                                    dr.Close();
+                                    return NotFound();
+                                }
+                                en.IdEnrollment = (int)dr["IdEnrollment"];
+                                dr.Close();
+
+                                com.CommandText = "SELECT StartDate FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
+                                com.Parameters.AddWithValue("IdStudies", idStudies);
+                                dr = com.ExecuteReader();
+                                if (!dr.Read())
+                                {
+                                    dr.Close();
+                                    return NotFound();
+                                }
+                                en.StartDate = (DateTime)dr["StartDate"];
+
+                            }
+                            catch (SqlException e)
+                            {
+                                Console.WriteLine(e.Message);
+                                tran.Rollback();
+                            }
+
+
+                        }
                     }
-                    catch (SqlException e)
-                    {
-                        Console.WriteLine(e.Message);
-                        tran.Rollback();
-                    }
 
 
+                    return Created("", en);
                 }
+                */
+        [HttpPost]
+        IActionResult EnrollStudent(EnrollRequest request)
+        {
+            Enrollment en = _service.EnrollStudent(request);
+            if (en.Equals(null))
+            {
+                return BadRequest("Brak Obiektu");
             }
-
-
             return Created("", en);
         }
 
-        
+        [HttpPost("{promotions}")]
+        IActionResult PromoteStudents(PromoteRequest request)
+        {
+        Enrollment en = _service.PromoteStudents(request);
+            if (en.Equals(null))
+            {
+                return NotFound();
+            }
+            return Created("", en);
+        }
+
+
     }
+
 }
+
+    
+

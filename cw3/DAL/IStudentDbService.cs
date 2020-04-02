@@ -10,10 +10,10 @@ namespace cw3.DAL
     public interface IStudentDbService
     {
 
-        void EnrollStudent(EnrollRequest request);
-        void PromoteStudents(int semester, string studies);
+        public Enrollment EnrollStudent(EnrollRequest request);
+        public Enrollment PromoteStudents(PromoteRequest request);
 
-        public IEnumerable<Student> GetStudents();
+        
 
     }
 }

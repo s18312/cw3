@@ -211,9 +211,26 @@ namespace cw3.DAL
 
 
 
-        public IEnumerable<Student> GetStudents()
+        public bool exists(string Index)
         {
-            throw new NotImplementedException();
+            using (SqlConnection con = new SqlConnection("Data Source=db-mssql;Initial Catalog=s18312;Integrated Security=True"))
+            {
+                using (SqlCommand com = new SqlCommand())
+                {
+                    com.Connection = con;
+                    com.CommandText = "select IndexNumber from Student WHERE IndexNumber=@index";
+                    com.Parameters.AddWithValue("index", Index);
+
+                    con.Open();
+                    SqlDataReader dr = com.ExecuteReader();
+                    if (!dr.Read())
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+            }
         }
     }
 }

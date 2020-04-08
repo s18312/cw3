@@ -1,0 +1,36 @@
+/weatherforecast  GET 
+/favicon.ico  GET 
+/api/students  GET {
+	"IndexNumber": "s1234",
+"FirstName": "Andrzej",
+"LastName": "Malewski",
+"BirthDate": "1993-03-30",
+"Studies": "Informatyka"
+}
+/api/students/1  GET {
+	"IndexNumber": "s1234",
+"FirstName": "Andrzej",
+"LastName": "Malewski",
+"BirthDate": "1993-03-30",
+"Studies": "Informatyka"
+}
+/weatherforecast  GET 
+/favicon.ico  GET 
+Sciezka: /weatherforecast QueryString:  Metoda: GET  Cialo: 
+Sciezka: /favicon.ico QueryString:  Metoda: GET  Cialo: 
+Sciezka: /api/students/1 QueryString:  Metoda: GET  Cialo: {
+	"IndexNumber": "s1234",
+"FirstName": "Andrzej",
+"LastName": "Malewski",
+"BirthDate": "1993-03-30",
+"Studies": "Informatyka"
+}
+Sciezka: /weatherforecast QueryString:  Metoda: GET  Cialo: 
+Sciezka: /favicon.ico QueryString:  Metoda: GET  Cialo: 
+Sciezka: /api/students/1 QueryString:  Metoda: GET  Cialo: {
+	"IndexNumber": "s1234",
+"FirstName": "Andrzej",
+"LastName": "Malewski",
+"BirthDate": "1993-03-30",
+"Studies": "Informatyka"
+}

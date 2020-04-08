@@ -108,5 +108,18 @@ namespace cw3.Controllers
             return Ok("Usuwanie ukończone");
         }
 
+
+
+       /* [HttpGet("{id}")]
+        public IActionResult ifExists(String index)
+        {
+            bool existence = _dbService.ifExists(index);
+            if (!existence)
+            {
+                return NotFound();
+            }
+            return Ok("Znaleziono");
+        } */
+
     }
 }

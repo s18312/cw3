@@ -13,7 +13,9 @@ namespace cw3.DAL
         public Enrollment EnrollStudent(EnrollRequest request);
         public Enrollment PromoteStudents(PromoteRequest request);
 
-        
+        public bool exists(string index);
+
+
 
     }
 }

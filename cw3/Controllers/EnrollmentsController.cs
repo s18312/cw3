@@ -1,11 +1,16 @@
 ﻿using cw3.DAL;
+using cw3.DTOs;
 using cw3.DTOs.Requests;
 using cw3.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace cw3.Controllers
@@ -225,6 +230,7 @@ namespace cw3.Controllers
                 }
                 */
         [HttpPost]
+        [Authorize(Roles = "employee")]
         IActionResult EnrollStudent(EnrollRequest request)
         {
             Enrollment en = _service.EnrollStudent(request);
@@ -236,6 +242,7 @@ namespace cw3.Controllers
         }
 
         [HttpPost("{promotions}")]
+        [Authorize(Roles = "employee")]
         IActionResult PromoteStudents(PromoteRequest request)
         {
         Enrollment en = _service.PromoteStudents(request);
@@ -246,6 +253,7 @@ namespace cw3.Controllers
             return Created("", en);
         }
 
+        
 
     }
 

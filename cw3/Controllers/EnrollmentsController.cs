@@ -22,6 +22,7 @@ namespace cw3.Controllers
     {
 
         private IStudentDbService _service;
+        private readonly StudentDbContext _context;
         private const string ConString = "Data Source=db-mssql;Initial Catalog=s18312;Integrated Security=True";
 
         public EnrollmentsController(SqlStudentServerDBService service)

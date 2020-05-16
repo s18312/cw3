@@ -1,5 +1,6 @@
 ﻿using cw3.DTOs.Requests;
 using cw3.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -10,7 +11,57 @@ namespace cw3.DAL
 {
     public class SqlStudentServerDBService : IStudentDbService
     {
+
+
+
+
         public Enrollment EnrollStudent(EnrollRequest request)
+        {
+            using (var db = new StudentDbContext())
+            {
+                var enrollment = new Enrollment();
+                
+                //sprawdzenie czy studia istnieją
+                if (!db.Studies.Any(studies => studies.Name == request.Studies))
+                {
+                    throw new Exception("Studia nie istnieją");
+                }
+
+                var studies = db.Studies.Where(studies => studies.Name == request.Studies).First();
+                enrollment.Semester = 1;
+                enrollment.StartDate = DateTime.Parse(DateTime.Now.ToShortTimeString());
+                enrollment.IdStudy = studies.IdStudy;
+
+                //Sprawdzenie czy istnieje enrollment
+                if (db.Enrollment.Any(e => e.IdStudy == studies.IdStudy && e.Semester == 1 && e.StartDate == db.Enrollment.Max(en => en.StartDate)))
+                {
+                    var enroll = db.Enrollment.Where(e => e.IdStudy == studies.IdStudy && e.Semester == 1 && e.StartDate == db.Enrollment.Max(en => en.StartDate)).Single();
+                    db.Student.Add(new Student { IndexNumber = request.IndexNumber, FirstName = request.FirstName, LastName = request.LastName, Birthdate = request.Birthdate, IdEnrollment = enroll.IdEnrollment });
+                    db.SaveChanges();
+                }
+                else
+                {
+                    //sprawdzam czy istnieje student
+                    if (!db.Student.Any(st => st.IndexNumber == request.IndexNumber))
+                    {
+                        throw new Exception("Student już istnieje");
+                    }
+                    else
+                    {
+                        var enrollments = db.Enrollment.Max(emp => emp.IdEnrollment);
+                        Enrollment nowy = new Enrollment { IdEnrollment = enrollments + 1, Semester = 1, IdStudy = studies.IdStudy, StartDate = DateTime.Now };
+                        enrollment.IdEnrollment = nowy.IdEnrollment;
+
+                        db.Enrollment.Add(nowy);
+                        db.Student.Add(new Student { IndexNumber = request.IndexNumber, FirstName = request.FirstName, LastName = request.LastName, Birthdate = request.Birthdate, IdEnrollment = nowy.IdEnrollment });
+                        db.SaveChanges();
+                    }
+                }
+                return enrollment;
+            }
+        }
+
+        /*public Enrollment EnrollStudent(EnrollRequest request)
         {
 
 
@@ -113,105 +164,126 @@ namespace cw3.DAL
                 }
             }
             return null;
-        }
+        }*/
 
-        
 
 
         public Enrollment PromoteStudents(PromoteRequest request)
         {
-            Enrollment en = new Enrollment();
-            using (SqlConnection con = new SqlConnection("Data Source = db - mssql; Initial Catalog = s18312; Integrated Security = True"))
+            using (var db = new StudentDbContext())
             {
-
-                using (SqlCommand com = new SqlCommand())
+                if (!db.Studies.Any(studies => studies.Name == request.Studies))
                 {
-                    com.Connection = con;
-                    con.Open();
-                    var tran = con.BeginTransaction();
-                    com.Transaction = tran;
+                    throw new Exception("Studia nie istnieją");
+                }
+                else
+                {
+                    db.Database.ExecuteSqlRaw("exec Procedura @Studies, @Semester", request.Studies, request.Semester);
+                    //poprzednim razem zapomniałem utworzyć procedury w bazie danych, teraz nie mogę tego zrobić bo mssql nie daje się połączyć - 16.05.2019
 
-                    try
-                    {
-                        com.CommandText = "SELECT IdStudy from Studies WHERE name=@name";
-                        com.Parameters.AddWithValue("name", request.Studies);
-                        var dr = com.ExecuteReader();
-                        if (!dr.Read())
-                        {
-                            dr.Close();
-                            tran.Rollback();
-                            return null;
-                        }
-                        int idStudies = (int)dr["IdStudy"];
-                        en.IdStudy = idStudies;
-                        dr.Close();
-                        com.CommandText = "SELECT Semester FROM Enrollment WHERE IdStudy = @IdStudies ";
-                        com.Parameters.AddWithValue("IdStudies", idStudies);
-                        dr = com.ExecuteReader();
-                        if (!dr.Read())
-                        {
-                            dr.Close();
-                            tran.Rollback();
-                            return null;
-                        }
-                        dr.Close();
-                        com.CommandText = "exec Procedura @Studies, @Semester";
-                        com.Parameters.AddWithValue("Studies", "Informatyka");
-                        com.Parameters.AddWithValue("Semester", request.Semester);
-                        en.Semester = request.Semester + 1;
-                        dr = com.ExecuteReader();
-                        if (!dr.Read())
-                        {
-                            dr.Close();
-                            tran.Rollback();
-                            return null;
-                        }
-                        else
-                        {
-                            dr.Close();
-                            com.BeginExecuteNonQuery();
-                            tran.Commit();
-                        }
+                    var studia = db.Studies.Where(studies => studies.Name == request.Studies).FirstOrDefault();
+                    var enrollment = db.Enrollment.Where(enroll => enroll.IdStudy == studia.IdStudy && enroll.Semester == request.Semester + 1).FirstOrDefault();
 
-                        com.CommandText = "SELECT IdEnrollment FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
-                        com.Parameters.AddWithValue("IdStudies", idStudies);
-                        dr = com.ExecuteReader();
-                        if (!dr.Read())
-                        {
-                            dr.Close();
-                            return null;
-                        }
-                        en.IdEnrollment = (int)dr["IdEnrollment"];
-                        dr.Close();
-
-                        com.CommandText = "SELECT StartDate FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
-                        com.Parameters.AddWithValue("IdStudies", idStudies);
-                        dr = com.ExecuteReader();
-                        if (!dr.Read())
-                        {
-                            dr.Close();
-                            return null;
-                        }
-                        en.StartDate = (DateTime)dr["StartDate"];
-
-                    }
-                    catch (SqlException e)
-                    {
-                        Console.WriteLine(e.Message);
-                        tran.Rollback();
-                    }
-
-
+                    return enrollment;
                 }
             }
-
-
-            return  en;
         }
 
 
+            /*public Enrollment PromoteStudents(PromoteRequest request)
+            {
+                Enrollment en = new Enrollment();
+                using (SqlConnection con = new SqlConnection("Data Source = db - mssql; Initial Catalog = s18312; Integrated Security = True"))
+                {
 
-        public bool exists(string Index)
+                    using (SqlCommand com = new SqlCommand())
+                    {
+                        com.Connection = con;
+                        con.Open();
+                        var tran = con.BeginTransaction();
+                        com.Transaction = tran;
+
+                        try
+                        {
+                            com.CommandText = "SELECT IdStudy from Studies WHERE name=@name";
+                            com.Parameters.AddWithValue("name", request.Studies);
+                            var dr = com.ExecuteReader();
+                            if (!dr.Read())
+                            {
+                                dr.Close();
+                                tran.Rollback();
+                                return null;
+                            }
+                            int idStudies = (int)dr["IdStudy"];
+                            en.IdStudy = idStudies;
+                            dr.Close();
+                            com.CommandText = "SELECT Semester FROM Enrollment WHERE IdStudy = @IdStudies ";
+                            com.Parameters.AddWithValue("IdStudies", idStudies);
+                            dr = com.ExecuteReader();
+                            if (!dr.Read())
+                            {
+                                dr.Close();
+                                tran.Rollback();
+                                return null;
+                            }
+                            dr.Close();
+                            com.CommandText = "exec Procedura @Studies, @Semester";
+                            com.Parameters.AddWithValue("Studies", "Informatyka");
+                            com.Parameters.AddWithValue("Semester", request.Semester);
+                            en.Semester = request.Semester + 1;
+                            dr = com.ExecuteReader();
+                            if (!dr.Read())
+                            {
+                                dr.Close();
+                                tran.Rollback();
+                                return null;
+                            }
+                            else
+                            {
+                                dr.Close();
+                                com.BeginExecuteNonQuery();
+                                tran.Commit();
+                            }
+
+                            com.CommandText = "SELECT IdEnrollment FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
+                            com.Parameters.AddWithValue("IdStudies", idStudies);
+                            dr = com.ExecuteReader();
+                            if (!dr.Read())
+                            {
+                                dr.Close();
+                                return null;
+                            }
+                            en.IdEnrollment = (int)dr["IdEnrollment"];
+                            dr.Close();
+
+                            com.CommandText = "SELECT StartDate FROM Enrollment WHERE IdStudy = @IdStudies AND Semester = 2";
+                            com.Parameters.AddWithValue("IdStudies", idStudies);
+                            dr = com.ExecuteReader();
+                            if (!dr.Read())
+                            {
+                                dr.Close();
+                                return null;
+                            }
+                            en.StartDate = (DateTime)dr["StartDate"];
+
+                        }
+                        catch (SqlException e)
+                        {
+                            Console.WriteLine(e.Message);
+                            tran.Rollback();
+                        }
+
+
+                    }
+                }
+
+
+                return  en;
+            }*/
+
+
+
+            public bool exists(string Index)
         {
             using (SqlConnection con = new SqlConnection("Data Source=db-mssql;Initial Catalog=s18312;Integrated Security=True"))
             {

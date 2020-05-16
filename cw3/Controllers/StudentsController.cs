@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using cw3.DAL;
 using cw3.DTOs;
+using cw3.DTOs.Requests;
 using cw3.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -20,19 +21,66 @@ namespace cw3.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly IStudentDbService _dbService;
+        private readonly StudentDbContext _context;
         private const string ConString = "Data Source=db-mssql;Initial Catalog=s18312;Integrated Security=True";
 
         public IConfiguration Configuration { get; set; }
 
 
-        public StudentsController([FromServices] IStudentDbService dbService, IConfiguration configuration)
+        /* public StudentsController([FromServices] IStudentDbService dbService, IConfiguration configuration)
+         {
+             _dbService = dbService;
+             Configuration = configuration;
+         }*/
+
+        public StudentsController(StudentDbContext context, IConfiguration configuration)
         {
-            _dbService = dbService;
             Configuration = configuration;
+            _context = context;
         }
-        
+
+
 
         [HttpGet]
+        public IActionResult GetStudents()
+        {
+            var list = _context.Student.Select(student => new{ IndexNumber = student.IndexNumber, FirstName = student.FirstName, LastName = student.LastName});
+            return Ok(list);
+        }
+
+
+        [HttpPut]
+        public IActionResult UpdateStudent(ChangeRequest stud)
+        {
+            var student = _context.Student.Where(stu => stu.IndexNumber == stud.IndexNumber);
+
+            Student changed = new Student{IndexNumber = stud.IndexNumber, FirstName = stud.FirstName, LastName = stud.LastName, Birthdate = stud.Birthdate, Studies = stud.Studies, IdEnrollment = stud.IdEnrollment};
+            _context.Attach(changed);
+            _context.Entry(changed).Property("FirstName").IsModified = true;
+            _context.Entry(changed).Property("LastName").IsModified = true;
+            _context.Entry(changed).Property("BirthDate").IsModified = true;
+            _context.Entry(changed).Property("Studies").IsModified = true;
+            _context.Entry(changed).Property("IdEnrollment").IsModified = true;
+            _context.SaveChanges();
+
+            return Ok("Zaktualizowano studenta o numerze:" + changed.IndexNumber);
+        }
+        
+        
+        
+        [HttpDelete("{id}")]
+        public IActionResult DeleteStudent(String id)
+        {
+            var student = _context.Student.Where(stu => stu.IndexNumber == id);
+            _context.Remove(student);
+            _context.SaveChanges();
+
+            return Ok("Usunięto studenta o numerze: " + id);
+        }
+
+
+
+       /* [HttpGet]
         public IActionResult GetStudents(string orderBy)
         {
             var list = new List<Student>();
@@ -60,9 +108,9 @@ namespace cw3.Controllers
            
 
             return Ok(list);
-        } 
+        } */
 
-        [HttpGet("{id}")]
+       /* [HttpGet("{id}")]
         public IActionResult GetStudents(int id)
         {
 
@@ -89,16 +137,16 @@ namespace cw3.Controllers
                     return Ok(result);
                 }
             }
-        }
+        }*/
 
-        [HttpPost]
+       /* [HttpPost]
         public IActionResult CreateStudent(Student student)
         {
             student.IndexNumber = $"s{new Random().Next(1, 20000)}";
             return Ok(student);
-        }
+        }*/
 
-        [HttpPut("{id}")]
+        /*[HttpPut("{id}")]
         public IActionResult UpdateStudent(String index, [FromBody]Student stud)
         {
             if (stud.IndexNumber == index)
@@ -106,9 +154,9 @@ namespace cw3.Controllers
                 stud.FirstName = "Tymoteusz";
             }
             return Ok("Aktualizacja dokończona " + stud.FirstName + " " + stud.LastName);
-        }
+        }*/
 
-        [HttpDelete("{id}")]
+       /* [HttpDelete("{id}")]
         public IActionResult DeleteStudent(String index, [FromBody]Student stud)
         {
             if (stud.IndexNumber == index)
@@ -116,7 +164,7 @@ namespace cw3.Controllers
                 stud = null;
             }
             return Ok("Usuwanie ukończone");
-        }
+        }*/
 
         [HttpPost]
         public IActionResult Login(LoginRequestDto request)

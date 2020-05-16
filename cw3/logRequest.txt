@@ -73,3 +73,8 @@ Sciezka: /api/students/1 QueryString:  Metoda: GET  Cialo: {
 "BirthDate": "1993-03-30",
 "Studies": "Informatyka"
 }
+Sciezka: /weatherforecast QueryString:  Metoda: GET  Cialo: 
+Sciezka: /favicon.ico QueryString:  Metoda: GET  Cialo: 
+Sciezka: /weatherforecast QueryString:  Metoda: GET  Cialo: 
+Sciezka: /favicon.ico QueryString:  Metoda: GET  Cialo: 
+Sciezka: /weatherforecast QueryString:  Metoda: GET  Cialo: 

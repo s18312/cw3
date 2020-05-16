@@ -37,6 +37,7 @@ namespace cw3.DAL
                 {
                     var enroll = db.Enrollment.Where(e => e.IdStudy == studies.IdStudy && e.Semester == 1 && e.StartDate == db.Enrollment.Max(en => en.StartDate)).Single();
                     db.Student.Add(new Student { IndexNumber = request.IndexNumber, FirstName = request.FirstName, LastName = request.LastName, Birthdate = request.Birthdate, IdEnrollment = enroll.IdEnrollment });
+                    enrollment.IdEnrollment = enroll.IdEnrollment;
                     db.SaveChanges();
                 }
                 else
@@ -179,7 +180,7 @@ namespace cw3.DAL
                 else
                 {
                     db.Database.ExecuteSqlRaw("exec Procedura @Studies, @Semester", request.Studies, request.Semester);
-                    //poprzednim razem zapomniałem utworzyć procedury w bazie danych, teraz nie mogę tego zrobić bo mssql nie daje się połączyć - 16.05.2019
+                    //poprzednim razem zapomniałem utworzyć procedury w bazie danych, teraz nie mogę tego zrobić bo mssql nie daje się połączyć - 16.05.2020
 
                     var studia = db.Studies.Where(studies => studies.Name == request.Studies).FirstOrDefault();
                     var enrollment = db.Enrollment.Where(enroll => enroll.IdStudy == studia.IdStudy && enroll.Semester == request.Semester + 1).FirstOrDefault();

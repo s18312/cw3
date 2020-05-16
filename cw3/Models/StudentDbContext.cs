@@ -37,20 +37,17 @@ namespace cw3.Models
             modelBuilder.Entity<Enrollment>().Property(e => e.StartDate).HasColumnType("date");
             modelBuilder.Entity<Enrollment>().HasOne(d => d.StudyId).WithMany(p => p.Enrollment).HasForeignKey(d => d.IdStudy).OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("Enrollment_Studies");
             
-            modelBuilder.Entity<Student>().HasKey(e => e.IndexNumber).HasName("Student_pk");
-            modelBuilder.Entity<Student>().Property(e => e.IndexNumber).HasMaxLength(100);
-            modelBuilder.Entity<Student>().Property(e => e.Birthdate).HasColumnType("date");
-            modelBuilder.Entity<Student>().Property(e => e.FirstName).IsRequired().HasMaxLength(100);
-            modelBuilder.Entity<Student>().Property(e => e.LastName).IsRequired().HasMaxLength(100);
-            modelBuilder.Entity<Student>().Property(e => e.Password).IsRequired().HasMaxLength(150).IsFixedLength();
-            modelBuilder.Entity<Student>().HasOne(d => d.EnrollmentId).WithMany(p => p.Student).HasForeignKey(d => d.IdEnrollment).OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("Student_Enrollment");
-
             modelBuilder.Entity<Studies>().HasKey(e => e.IdStudy).HasName("Studies_pk");
             modelBuilder.Entity<Studies>().Property(e => e.IdStudy).ValueGeneratedNever();
             modelBuilder.Entity<Studies>().Property(e => e.Name).IsRequired().HasMaxLength(100);
-           
-        }
 
+            modelBuilder.Entity<Student>().HasKey(e => e.IndexNumber).HasName("Student_pk");
+            modelBuilder.Entity<Student>().Property(e => e.IndexNumber).IsRequired().HasMaxLength(100);
+            modelBuilder.Entity<Student>().Property(e => e.Birthdate).HasColumnType("date");
+            modelBuilder.Entity<Student>().Property(e => e.FirstName).IsRequired().HasMaxLength(100);
+            modelBuilder.Entity<Student>().Property(e => e.LastName).IsRequired().HasMaxLength(100);
+            modelBuilder.Entity<Student>().HasOne(d => d.EnrollmentId).WithMany(p => p.Student).HasForeignKey(d => d.IdEnrollment).OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("Student_Enrollment");
+        }
 
 
 
